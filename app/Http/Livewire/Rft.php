@@ -114,7 +114,7 @@ class Rft extends Component
         $additionalMessage = $balanceOutputData < $this->outputInput && $balanceOutputData > 0 ? "<b>".($this->outputInput - $balanceOutputData)."</b> output melebihi batas input." : null;
         // if ($balanceOutputData < $this->outputInput) {
         //     $this->outputInput = $balanceOutputData;
-        // }
+        //
 
         $currentPo = DB::connection("mysql_nds")->table("ppic_master_so")->selectRaw("
                 ppic_master_so.id
@@ -159,6 +159,13 @@ class Rft extends Component
                 } else {
                     $this->emit('alert', 'error', "Terjadi kesalahan. Output tidak berhasil direkam.");
                 }
+            } else {
+                $getSize = DB::table('so_det')
+                    ->select('id', 'size', 'dest')
+                    ->where('id', $this->sizeInput)
+                    ->first();
+
+                $this->emit('alert', 'error', "PO tidak ditemukan untuk size <b>".$getSize->size.($getSize->dest && $getSize->dest != '-' ? ' - '.$getSize->dest : '')."</b> (ID SO : <b>".$this->sizeInput."</b>)");
             }
         } else {
             $this->emit('alert', 'error', "Output packing-line tidak bisa melebihi finishline.");
