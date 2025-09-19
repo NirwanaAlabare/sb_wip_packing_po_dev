@@ -114,9 +114,9 @@ class Rft extends Component
         $balanceOutputData = $finishlineOutputData-$currentOutputData;
 
         $additionalMessage = $balanceOutputData < $this->outputInput && $balanceOutputData > 0 ? "<b>".($this->outputInput - $balanceOutputData)."</b> output melebihi batas input QC Finishing." : null;
-        // if ($balanceOutputData < $this->outputInput) {
-        //     $this->outputInput = $balanceOutputData;
-        //
+        if ($balanceOutputData < $this->outputInput) {
+            $this->outputInput = $balanceOutputData;
+        }
 
         // $currentPo = DB::connection("mysql_nds")->table("ppic_master_so")->selectRaw("
         //         ppic_master_so.id
