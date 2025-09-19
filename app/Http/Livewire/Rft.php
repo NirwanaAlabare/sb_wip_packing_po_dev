@@ -5,6 +5,8 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use App\Models\SignalBit\OutputGudangStok;
 use App\Models\SignalBit\Rft as RftModel;
 use App\Models\SignalBit\Defect;
 use App\Models\SignalBit\Rework;
@@ -146,25 +148,49 @@ class Rft extends Component
 
         $insertData = [];
         if ($this->outputInput > 0) {
-            if ($currentPo) {
+            if ($this->selectedPo == "GUDANG_STOK" || $currentPo) {
 
-                if (($currentPo->qty_output + $this->outputInput) <= $currentPo->qty_po) {
+                if ($this->selectedPo == "GUDANG_STOK" || (($currentPo->qty_output + $this->outputInput) <= $currentPo->qty_po)) {
+                    $batch = Str::uuid();
                     for ($i = 0; $i < $this->outputInput; $i++)
                     {
                         array_push($insertData, [
                             'master_plan_id' => $this->orderInfo->id,
                             'so_det_id' => $this->sizeInput,
-                            'po_id' => $currentPo->id,
+                            'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
-                            'created_by' => Auth::user()->line_id,
+                            'created_by' => Auth::user()->id,
+                            'created_by_username' => Auth::user()->username,
+                            'created_by_line' => Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username,
                             'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
+                            'updated_at' => Carbon::now(),
+                            'batch' => $batch
                         ]);
                     }
 
                     $insertRft = RftModel::insert($insertData);
 
                     if ($insertRft) {
+                        // Gudang Stok
+                        if ($this->selectedPo == "GUDANG_STOK") {
+                            $currentRft = RftModel::where("batch", $batch)->get();
+
+                            $insertDataGudangStok = [];
+                            foreach ($currentRft as $rft) {
+                                array_push($insertDataGudangStok, [
+                                    'so_det_id' => $this->sizeInput,
+                                    'packing_po_id' => $rft->id,
+                                    'created_by' => Auth::user()->id,
+                                    'created_by_username' => Auth::user()->username,
+                                    'created_by_line' => Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username,
+                                    'created_at' => Carbon::now(),
+                                    'updated_at' => Carbon::now()
+                                ]);
+                            }
+
+                            OutputGudangStok::insert($insertDataGudangStok);
+                        }
+
                         $getSize = DB::table('so_det')
                             ->select('id', 'size')
                             ->where('id', $this->sizeInput)

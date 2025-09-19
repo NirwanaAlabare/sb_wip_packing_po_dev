@@ -28,21 +28,17 @@ class LoginController extends Controller
 
         $remember = isset($credentials['remember']) && $credentials['remember'] == "true" ? true : false;
 
-        $userData = UserPassword::select('Groupp')->where('username', $credentials['username'])->where('password', $credentials['password'])->first();
+        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $remember)) {
+            $request->session()->regenerate();
 
-        if ($userData->Groupp == 'SEWING' || $userData->Groupp == 'ALLSEWING') {
-            if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $remember)) {
-                $request->session()->regenerate();
+            session(['user_id' => Auth::user()->id, 'user_username' => Auth::user()->username, 'user_name' => Auth::user()->username]);
 
-                session(['user_id' => Auth::user()->line_id, 'user_username' => Auth::user()->username, 'user_name' => Auth::user()->FullName]);
-
-                return array(
-                    'status' => '200',
-                    'message' => 'Authenticate Success',
-                    'redirect' => url('/'),
-                    'additional' => [],
-                );
-            }
+            return array(
+                'status' => '200',
+                'message' => 'Authenticate Success',
+                'redirect' => url('/'),
+                'additional' => [],
+            );
         }
 
         return array(

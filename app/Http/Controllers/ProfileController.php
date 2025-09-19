@@ -90,7 +90,7 @@ class ProfileController extends Controller
             update($updateArray);
 
         if ($updateProfile) {
-            session(['user_id' => Auth::user()->line_id, 'user_username' => Auth::user()->username, 'user_name' => Auth::user()->FullName]);
+            session(['user_id' => Auth::user()->line_id, 'user_username' => Auth::user()->username, 'user_name' => Auth::user()->username]);
 
             return array(
                 'status' => '200',

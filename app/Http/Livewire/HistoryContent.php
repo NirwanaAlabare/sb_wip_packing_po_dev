@@ -62,14 +62,14 @@ class HistoryContent extends Component
             leftJoin('master_plan', 'master_plan.id', '=', 'output_rfts_packing_po.master_plan_id')->
             leftJoin('so_det', 'so_det.id', '=', 'output_rfts_packing_po.so_det_id')->
             where('output_rfts_packing_po.status', 'normal');
-            if (Auth::user()->Groupp != 'ALLSEWING') {
-                $latestOutputRfts->where('master_plan.sewing_line', Auth::user()->username);
+            if (Auth::user()) {
+                $latestOutputRfts->where('output_rfts_packing_po.created_by', Auth::user()->id);
             }
             if ($this->masterPlan) {
                 $latestOutputRfts->where('master_plan.id', $this->masterPlan);
             }
         $latestRfts = $latestOutputRfts->whereRaw("DATE(output_rfts_packing_po.created_at) BETWEEN '".$this->dateFrom."' AND '".$this->dateTo."'")->
-            whereRaw("master_plan.tgl_plan BETWEEN '".$this->dateFrom."' AND '".$this->dateTo."'")->
+            // whereRaw("master_plan.tgl_plan BETWEEN '".$this->dateFrom."' AND '".$this->dateTo."'")->
             groupBy("output_rfts_packing_po.updated_at", "so_det.size")->
             orderBy("output_rfts_packing_po.updated_at", "desc")->
             orderBy("output_rfts_packing_po.created_at", "desc")->

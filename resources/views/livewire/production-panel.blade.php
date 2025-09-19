@@ -81,6 +81,11 @@
                 </div>
             </div>
         </div>
+        @if (Auth::user()->line_type == 'multi')
+            <div class="d-flex justify-content-center">
+                <span class="badge text-bg-success mt-1 mb-0">{{ strtoupper($orderInfo->sewing_line) }}</span>
+            </div>
+        @endif
     </div>
 
     {{-- Production Panels --}}
@@ -310,11 +315,11 @@
             getPo();
         });
 
-        window.addEventListener("focus", () => {
-            Livewire.emit('updateOrder');
+        // window.addEventListener("focus", () => {
+        //     Livewire.emit('updateOrder');
 
-            // restrictYesterdayMasterPlan();
-        });
+        //     restrictYesterdayMasterPlan();
+        // });
 
         // Pad 2 Digits
         function pad(n) {
@@ -450,6 +455,7 @@
                 type: "get",
                 url: "{{ route('get-po-size-qty') }}",
                 data: {
+                    po: $("#product-po").val(),
                     po_id: $("#product-po-id").val(),
                 },
                 dataType: "json",
