@@ -5,7 +5,7 @@
             <input type="text" class="form-control" wire:model='search' placeholder="Search Order...">
             <button class="btn btn-success" type="button" id="button-search-order"><i class="fa-regular fa-magnifying-glass"></i></button>
         </div>
-        {{-- <button class="btn btn-outline-success mb-3" type="button" wire:click="preSubmitFilter" id="filter-button"><i class="fa-regular fa-filter"></i></button> --}}
+        <button class="btn btn-outline-success mb-3" type="button" wire:click="preSubmitFilter" id="filter-button"><i class="fa-regular fa-filter"></i></button>
     </div>
 
     <div class="loading-container-fullscreen hidden" id="loading-order-list">
@@ -169,7 +169,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-times"></i> Tutup</button>
                     <button type="button" class="btn btn-success" wire:click="clearFilter"><i class="fa-regular fa-broom"></i> Bersihkan</button>
-                    {{-- <button type="button" class="btn btn-success" wire:click='submitFilter'><i class="fa-regular fa-check"></i> Terapkan</button> --}}
+                    <button type="button" class="btn btn-success" wire:click='submitFilter'><i class="fa-regular fa-check"></i> Terapkan</button>
                 </div>
             </div>
         </div>
