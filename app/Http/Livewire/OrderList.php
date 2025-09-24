@@ -163,7 +163,17 @@ class OrderList extends Component
             ->leftJoin('masterproduct', 'masterproduct.id', '=', 'act_costing.id_product')
             ->where('so_det.cancel', 'N')
             ->where('master_plan.cancel', 'N')
-            ->whereRaw('master_plan.tgl_plan = "'.$this->date.'" '.$additionalQuery)
+            ->whereRaw("
+                (
+                    ".$lineFilter."
+                    ".($this->filterLine ? "AND master_plan.sewing_line = '".str_replace(" ", "_", strtoupper($this->filterLine))."'" : "")."
+                    ".($this->filterBuyer ? "AND mastersupplier.supplier = '".$this->filterBuyer."'" : "")."
+                    ".($this->filterWs ? "AND act_costing.kpno = '".$this->filterWs."'" : "")."
+                    ".($this->filterStyle ? "AND act_costing.styleno = '".$this->filterStyle."'" : "")."
+                ) AND
+                master_plan.tgl_plan = '".$this->date."'
+                ".$additionalQuery."
+            ")
             ->orderBy('master_plan.tgl_plan', 'desc')
             ->orderBy('master_plan.sewing_line', 'asc')
             ->orderBy('mastersupplier.supplier', 'asc')

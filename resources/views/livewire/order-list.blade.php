@@ -169,7 +169,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-times"></i> Tutup</button>
                     <button type="button" class="btn btn-success" wire:click="clearFilter"><i class="fa-regular fa-broom"></i> Bersihkan</button>
-                    <button type="button" class="btn btn-success" wire:click='submitFilter'><i class="fa-regular fa-check"></i> Terapkan</button>
+                    {{-- <button type="button" class="btn btn-success" wire:click='submitFilter'><i class="fa-regular fa-check"></i> Terapkan</button> --}}
                 </div>
             </div>
         </div>
