@@ -106,6 +106,8 @@ class OrderList extends Component
         $masterPlanBefore = MasterPlan::selectRaw("MAX(master_plan.id) id")->
             leftJoin("act_costing", "act_costing.id", "=", "master_plan.id_ws")->
             leftJoin("mastersupplier", "mastersupplier.Id_Supplier", "=", "act_costing.id_buyer")->
+            where("master_plan.cancel", "N")->
+            where("tgl_plan", "<", $this->date)->
             whereRaw("
                 (
                     ".$lineFilter."
@@ -115,8 +117,6 @@ class OrderList extends Component
                     ".($this->filterStyle ? "AND act_costing.styleno = '".$this->filterStyle."'" : "")."
                 )
             ")->
-            where("master_plan.cancel", "N")->
-            where("tgl_plan", "<", $this->date)->
             whereRaw("
                 (
                     act_costing.kpno LIKE '%".$this->search."%'
@@ -135,7 +135,7 @@ class OrderList extends Component
             groupBy("master_plan.sewing_line", "master_plan.id_ws", "master_plan.color")->
             orderBy("tgl_plan", "desc")->
             orderBy("sewing_line", "asc")->
-            limit(33)->
+            limit(Auth::user()->line_type == "multi" ? 33 : 3)->
             get();
 
         $additionalQuery = "";
@@ -170,9 +170,9 @@ class OrderList extends Component
                     ".($this->filterBuyer ? "AND mastersupplier.supplier = '".$this->filterBuyer."'" : "")."
                     ".($this->filterWs ? "AND act_costing.kpno = '".$this->filterWs."'" : "")."
                     ".($this->filterStyle ? "AND act_costing.styleno = '".$this->filterStyle."'" : "")."
-                ) AND
-                master_plan.tgl_plan = '".$this->date."'
-                ".$additionalQuery."
+                    AND master_plan.tgl_plan = '".$this->date."'
+                    ".$additionalQuery."
+                )
             ")
             ->orderBy('master_plan.tgl_plan', 'desc')
             ->orderBy('master_plan.sewing_line', 'asc')
@@ -272,9 +272,9 @@ class OrderList extends Component
                     ".($this->filterBuyer ? "AND mastersupplier.supplier = '".$this->filterBuyer."'" : "")."
                     ".($this->filterWs ? "AND act_costing.kpno = '".$this->filterWs."'" : "")."
                     ".($this->filterStyle ? "AND act_costing.styleno = '".$this->filterStyle."'" : "")."
-                ) AND
-                master_plan.tgl_plan = '".$this->date."'
-                ".$additionalQuery."
+                    AND master_plan.tgl_plan = '".$this->date."'
+                    ".$additionalQuery."
+                )
             ")
             ->whereRaw("
                 (
