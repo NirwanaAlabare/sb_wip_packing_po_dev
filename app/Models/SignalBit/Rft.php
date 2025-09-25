@@ -21,6 +21,7 @@ class Rft extends Model
         'no_cut_size',
         'kode_numbering',
         'status',
+        'alokasi',
         'created_by',
         'created_by_username',
         'created_by_line',

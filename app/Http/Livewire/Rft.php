@@ -159,6 +159,7 @@ class Rft extends Component
                             'so_det_id' => $this->sizeInput,
                             'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
+                            'alokasi' => $currentPo ? 'po' : 'gudang stok',
                             'created_by' => Auth::user()->id,
                             'created_by_username' => Auth::user()->username,
                             'created_by_line' => Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username,
