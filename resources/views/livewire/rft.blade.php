@@ -42,7 +42,7 @@
                             <p class="mb-1 fs-5">:</p>
                             <p id="rft-qty" class="mb-1 fs-5">{{ $output->sum('output') }}</p>
                         </div>
-                        <button class="btn btn-dark" wire:click='clearInput'>
+                        <button class="btn btn-dark" wire:click="$emit('preSubmitUndo', 'rft')">
                             <i class="fa-regular fa-rotate-left"></i>
                         </button>
                         {{-- <button class="btn btn-dark">
