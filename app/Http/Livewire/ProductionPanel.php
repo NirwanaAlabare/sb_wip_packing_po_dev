@@ -211,7 +211,7 @@ class ProductionPanel extends Component
                 // Undo RFT
                 $rftSql = Rft::where('master_plan_id', $this->orderInfo->id)->
                     where('so_det_id', $this->undoSize)->
-                    where('created_by', Auth::user()->username)->
+                    where('created_by', Auth::user()->id)->
                     where('status', 'NORMAL')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
@@ -242,6 +242,8 @@ class ProductionPanel extends Component
                     $this->emit('alert', 'success', 'Output RFT dengan ukuran '.$size[0]->size.' berhasil di UNDO sebanyak '.$deleteRft.' kali.');
 
                     $this->emit('hideModal', 'undo');
+
+                    $this->emit('updateOrder');
                 } else {
                     $this->emit('alert', 'error', 'Output RFT dengan ukuran '.$size[0]->size.' gagal di UNDO.');
                 }
