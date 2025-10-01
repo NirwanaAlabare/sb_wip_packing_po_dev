@@ -125,6 +125,9 @@ class Rft extends Component
         //     ->where('ppic_master_so.id_so_det', $this->sizeInput)
         //     ->first();
 
+        $currentSizeInput = $this->sizeInput;
+        $currentSizeInputText = $this->sizeInputText;
+
         $currentPo = DB::connection("mysql_nds")->table("ppic_master_so")->selectRaw("
                 ppic_master_so.id,
                 ppic_master_so.po,
@@ -142,7 +145,7 @@ class Rft extends Component
             ->leftJoin('signalbit_erp.masterproduct', 'masterproduct.id', '=', 'act_costing.id_product')
             ->where('so_det.cancel', '!=', 'Y')
             ->where('ppic_master_so.po', $this->selectedPo)
-            ->where('ppic_master_so.id_so_det', $this->sizeInput)
+            ->where('ppic_master_so.id_so_det', $currentSizeInput)
             ->groupBy('ppic_master_so.id')
             ->first();
 
@@ -156,7 +159,7 @@ class Rft extends Component
                     {
                         array_push($insertData, [
                             'master_plan_id' => $this->orderInfo->id,
-                            'so_det_id' => $this->sizeInput,
+                            'so_det_id' => $currentSizeInput,
                             'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
                             'alokasi' => $currentPo ? 'po' : 'gudang stok',
@@ -179,7 +182,7 @@ class Rft extends Component
                             $insertDataGudangStok = [];
                             foreach ($currentRft as $rft) {
                                 array_push($insertDataGudangStok, [
-                                    'so_det_id' => $this->sizeInput,
+                                    'so_det_id' => $currentSizeInput,
                                     'packing_po_id' => $rft->id,
                                     'created_by' => Auth::user()->id,
                                     'created_by_username' => Auth::user()->username,
@@ -194,7 +197,7 @@ class Rft extends Component
 
                         $getSize = DB::table('so_det')
                             ->select('id', 'size')
-                            ->where('id', $this->sizeInput)
+                            ->where('id', $currentSizeInput)
                             ->first();
 
                         $this->emit('alert', 'success', "<b>".$this->outputInput."</b> output berukuran <b>".$getSize->size."</b> berhasil terekam. ");
@@ -215,10 +218,10 @@ class Rft extends Component
             } else {
                 $getSize = DB::table('so_det')
                     ->select('id', 'size', 'dest')
-                    ->where('id', $this->sizeInput)
+                    ->where('id', $currentSizeInput)
                     ->first();
 
-                $this->emit('alert', 'error', "PO tidak ditemukan untuk size <b>".$getSize->size.($getSize->dest && $getSize->dest != '-' ? ' - '.$getSize->dest : '')."</b> (ID SO : <b>".$this->sizeInput."</b>)");
+                $this->emit('alert', 'error', "PO tidak ditemukan untuk size <b>".$getSize->size.($getSize->dest && $getSize->dest != '-' ? ' - '.$getSize->dest : '')."</b> (ID SO : <b>".$currentSizeInput."</b>)");
             }
         } else {
             $this->emit('alert', 'error', "Output packing-line tidak bisa melebihi finishline.");
