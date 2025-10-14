@@ -135,7 +135,7 @@ class ProductionPanel extends Component
             ->where('so_det.color', $this->selectedColorName)
             ->where('master_plan.cancel', 'N')
             ->where('so_det.cancel', 'N')
-            ->groupBy('so_det.size')
+            ->groupBy('act_costing.id', 'so_det.color', 'so_det.size')
             ->orderBy('so_det_id')
             ->get();
 
@@ -458,7 +458,7 @@ class ProductionPanel extends Component
             ->where('so_det.color', $this->selectedColorName)
             ->where('master_plan.cancel', "N")
             ->where('so_det.cancel', "N")
-            ->groupBy('so_det.id')
+            ->groupBy('act_costing.id', 'so_det.color', 'so_det.size')
             ->orderBy('so_det_id')
             ->get();
 

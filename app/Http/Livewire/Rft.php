@@ -106,8 +106,14 @@ class Rft extends Component
     {
         $validatedData = $this->validate();
 
-        $finishlineOutputData = DB::table("output_rfts_packing")->selectRaw("output_rfts_packing.*")->leftJoin("master_plan", "master_plan.id", "=", "output_rfts_packing.master_plan_id")->where("id_ws", $this->orderInfo->id_ws)->where("color", $this->orderInfo->color)->where("so_det_id", $this->sizeInput)->count();
-        $currentRftData = RftModel::selectRaw("output_rfts_packing_po.*")->leftJoin("master_plan", "master_plan.id", "=", "output_rfts_packing_po.master_plan_id")->where('id_ws', $this->orderInfo->id_ws)->where("color", $this->orderInfo->color)->where("so_det_id", $this->sizeInput)->count();
+        $currentSoDet = DB::table("so_det")->selectRaw("so_det.id as so_det_id, act_costing.id as id_cost, act_costing.kpno, so_det.color, so_det.size, so_det.dest")->leftJoin("so", "so.id", "=", "so_det.id_so")->leftJoin("act_costing", "act_costing.id", "=", "so.id_cost")->where("act_costing.id", $this->orderInfo->id_ws)->where("so_det.color", $this->orderInfo->color)->where("so_det.id", $this->sizeInput)->first();
+
+        if (!$currentSoDet) {
+            return $this->emit('alert', 'error', "Size Tidak ditemukan");
+        }
+
+        $finishlineOutputData = DB::table("output_rfts_packing")->selectRaw("output_rfts_packing.*")->leftJoin("master_plan", "master_plan.id", "=", "output_rfts_packing.master_plan_id")->leftJoin("so_det", "so_det.id", "=", "output_rfts_packing.so_det_id")->where("master_plan.id_ws", $this->orderInfo->id_ws)->where("master_plan.color", $this->orderInfo->color)->where("so_det.size", $currentSoDet->size)->count();
+        $currentRftData = RftModel::selectRaw("output_rfts_packing_po.*")->leftJoin("master_plan", "master_plan.id", "=", "output_rfts_packing_po.master_plan_id")->where('id_ws', $this->orderInfo->id_ws)->where("color", $this->orderInfo->color)->where("so_det_id", $currentSoDet->size)->count();
         // $currentDefectData = Defect::selectRaw("output_defects_packing.*")->leftJoin("master_plan", "master_plan.id", "=", "output_defects_packing.master_plan_id")->where('id_ws', $this->orderInfo->id_ws)->where("color", $this->orderInfo->color)->where("so_det_id", $this->sizeInput)->where("defect_status", "defect")->count();
         // $currentRejectData = Reject::selectRaw("output_rejects_packing.*")->leftJoin("master_plan", "master_plan.id", "=", "output_rejects_packing.master_plan_id")->where('id_ws', $this->orderInfo->id_ws)->where("color", $this->orderInfo->color)->where("so_det_id", $this->sizeInput)->count();
         $currentOutputData = $currentRftData/*+$currentDefectData+$currentRejectData*/;
@@ -126,13 +132,15 @@ class Rft extends Component
         //     ->first();
 
         $currentSizeInput = $this->sizeInput;
-        $currentSizeInputText = $this->sizeInputText;
+        // $currentSizeInputText = $this->sizeInputText;
 
         $currentPo = DB::connection("mysql_nds")->table("ppic_master_so")->selectRaw("
                 ppic_master_so.id,
                 ppic_master_so.po,
                 ppic_master_so.id_so_det,
+                so_det.id as so_det_id,
                 so_det.size,
+                so_det.dest,
                 ppic_master_so.qty_po,
                 COUNT(output_rfts_packing_po.id) as qty_output
             ")
@@ -145,7 +153,8 @@ class Rft extends Component
             ->leftJoin('signalbit_erp.masterproduct', 'masterproduct.id', '=', 'act_costing.id_product')
             ->where('so_det.cancel', '!=', 'Y')
             ->where('ppic_master_so.po', $this->selectedPo)
-            ->where('ppic_master_so.id_so_det', $currentSizeInput)
+            ->where('so_det.color', $currentSoDet->color)
+            ->where('so_det.size', $currentSoDet->size)
             ->groupBy('ppic_master_so.id')
             ->first();
 
@@ -159,7 +168,7 @@ class Rft extends Component
                     {
                         array_push($insertData, [
                             'master_plan_id' => $this->orderInfo->id,
-                            'so_det_id' => $currentSizeInput,
+                            'so_det_id' => $currentPo ? $currentPo->so_det_id : $currentSoDet->so_det_id,
                             'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
                             'alokasi' => $currentPo ? 'po' : 'gudang stok',
@@ -182,7 +191,7 @@ class Rft extends Component
                             $insertDataGudangStok = [];
                             foreach ($currentRft as $rft) {
                                 array_push($insertDataGudangStok, [
-                                    'so_det_id' => $currentSizeInput,
+                                    'so_det_id' => $currentSoDet->so_det_id,
                                     'packing_po_id' => $rft->id,
                                     'created_by' => Auth::user()->id,
                                     'created_by_username' => Auth::user()->username,
@@ -195,12 +204,7 @@ class Rft extends Component
                             OutputGudangStok::insert($insertDataGudangStok);
                         }
 
-                        $getSize = DB::table('so_det')
-                            ->select('id', 'size')
-                            ->where('id', $currentSizeInput)
-                            ->first();
-
-                        $this->emit('alert', 'success', "<b>".$this->outputInput."</b> output berukuran <b>".$getSize->size."</b> berhasil terekam. ");
+                        $this->emit('alert', 'success', "<b>".$this->outputInput."</b> output berukuran <b>".$currentSoDet->size."</b> berhasil terekam. ");
                         if ($additionalMessage) {
                             $this->emit('alert', 'error', $additionalMessage);
                         }
@@ -216,12 +220,7 @@ class Rft extends Component
                     $this->emit('alert', 'error', "QTY <b>Output</b> tidak dapat melebihi QTY <b>PO</b>.");
                 }
             } else {
-                $getSize = DB::table('so_det')
-                    ->select('id', 'size', 'dest')
-                    ->where('id', $currentSizeInput)
-                    ->first();
-
-                $this->emit('alert', 'error', "PO tidak ditemukan untuk size <b>".$getSize->size.($getSize->dest && $getSize->dest != '-' ? ' - '.$getSize->dest : '')."</b> (ID SO : <b>".$currentSizeInput."</b>)");
+                $this->emit('alert', 'error', "PO tidak ditemukan untuk size <b>".$currentSoDet->size.($currentSoDet->dest && $currentSoDet->dest != '-' ? ' - '.$currentSoDet->dest : '')."</b> (ID SO : <b>".$currentSoDet->so_det_id."</b>)");
             }
         } else {
             $this->emit('alert', 'error', "Output packing-line tidak bisa melebihi finishline.");
