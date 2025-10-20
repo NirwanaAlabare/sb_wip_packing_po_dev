@@ -76,7 +76,7 @@ class ProductionPanel extends Component
         'toRft' => 'toRft',
         // 'toDefect' => 'toDefect',
         // 'toDefectHistory' => 'toDefectHistory',
-        // 'toReject' => 'toReject',
+        'toReject' => 'toReject',
         // 'toRework' => 'toRework',
         'countRft' => 'countRft',
         // 'countDefect' => 'countDefect',
@@ -101,11 +101,21 @@ class ProductionPanel extends Component
         $this->selectedColor = $this->orderWsDetails[0]->id;
         $this->selectedColorName = $this->orderWsDetails[0]->color;
         $this->selectedSize = 'all';
-        $this->panels = false;
-        $this->rft = true;
+        $this->selectedPo = '';
+        $this->selectedPoId = '';
+
+        if (Auth::user()->line_type == "multi") {
+            $this->panels = true;
+            $this->rft = false;
+            $this->reject = false;
+        } else {
+            $this->panels = false;
+            $this->rft = true;
+            $this->reject = false;
+        }
+
         // $this->defect = false;
         // $this->defectHistory = false;
-        // $this->reject = false;
         // $this->rework = false;
         $this->outputRft = 0;
         // $this->outputDefect = 0;
@@ -134,7 +144,7 @@ class ProductionPanel extends Component
             ->where('so_det.color', $this->selectedColorName)
             ->where('master_plan.cancel', 'N')
             ->where('so_det.cancel', 'N')
-            ->groupBy('so_det.size')
+            ->groupBy('so_det.color', 'so_det.size')
             ->orderBy('so_det_id')
             ->get();
 
@@ -164,12 +174,12 @@ class ProductionPanel extends Component
     //     $this->emit('toInputPanel', 'defect');
     // }
 
-    // public function toReject()
-    // {
-    //     $this->panels = false;
-    //     $this->reject = !($this->reject);
-    //     $this->emit('toInputPanel', 'reject');
-    // }
+    public function toReject()
+    {
+        $this->panels = false;
+        $this->reject = !($this->reject);
+        $this->emit('toInputPanel', 'reject');
+    }
 
     // public function toRework()
     // {
@@ -495,7 +505,7 @@ class ProductionPanel extends Component
                         master_plan on master_plan.id = output_rfts_packing_po.master_plan_id
                     where
                         master_plan.id = '".$this->orderInfo->id."'
-                        and output_rfts_packing_po.status = 'NORMAL'
+                        and output_rfts_packing_po.type = 'rft'
                     group by
                         master_plan.id
                 ) rfts
@@ -542,13 +552,14 @@ class ProductionPanel extends Component
                 (
                     select
                         master_plan.id master_plan_id,
-                        count(output_rejects_packing.id) output
+                        count(output_rfts_packing_po.id) output
                     from
-                        output_rejects_packing
+                        output_rfts_packing_po
                     left join
-                        master_plan on master_plan.id = output_rejects_packing.master_plan_id
+                        master_plan on master_plan.id = output_rfts_packing_po.master_plan_id
                     where
                         master_plan.id = '".$this->orderInfo->id."'
+                        and output_rfts_packing_po.type = 'reject'
                     group by
                         master_plan.id
                 ) rejects
@@ -561,7 +572,7 @@ class ProductionPanel extends Component
         $this->outputRft = $masterPlan->output_rft ? $masterPlan->output_rft : 0;
         // $this->outputDefect = $masterPlan->output_defect ? $masterPlan->output_defect : 0;
         // $this->outputRework = $masterPlan->output_rework ? $masterPlan->output_rework : 0;
-        // $this->outputReject = $masterPlan->output_reject ? $masterPlan->output_reject : 0;
+        $this->outputReject = $masterPlan->output_reject ? $masterPlan->output_reject : 0;
         $soDet = DB::table('so_det')->where('id', $this->selectedSize)->first();
         $sqlFiltered = Rft::select('id')->leftJoin('so_det', 'so_det.id', '=', 'output_rfts_packing_po.so_det_id')->where('master_plan_id', $this->orderInfo->id)->where('status', 'NORMAL');
         $this->outputFiltered = $this->selectedSize == 'all' ? $sqlFiltered->count() : $sqlFiltered->where('so_det.size', $soDet->size)->count();
@@ -589,16 +600,16 @@ class ProductionPanel extends Component
             //         groupBy('so_det.id', 'so_det.size')->
             //         get();
             //     break;
-            // case 'reject' :
-            //     $this->undoSizes = Reject::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
-            //         leftJoin('so_det', 'so_det.id', '=', 'output_rejects_packing.so_det_id')->
-            //         where('master_plan_id', $this->orderInfo->id)->
-            //         where('status', 'NORMAL')->
-            //         orderBy('updated_at', 'DESC')->
-            //         orderBy('created_at', 'DESC')->
-            //         groupBy('so_det.id', 'so_det.size')->
-            //         get();
-            //     break;
+            case 'reject' :
+                $this->undoSizes = Reject::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
+                    leftJoin('so_det', 'so_det.id', '=', 'output_rejects_packing.so_det_id')->
+                    where('master_plan_id', $this->orderInfo->id)->
+                    where('status', 'NORMAL')->
+                    orderBy('updated_at', 'DESC')->
+                    orderBy('created_at', 'DESC')->
+                    groupBy('so_det.id', 'so_det.size')->
+                    get();
+                break;
             // case 'rework' :
             //     $this->undoSizes = Rework::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
             //         leftJoin('output_defects_packing', 'output_defects_packing.id', '=', 'output_reworks_packing.defect_id')->
@@ -613,8 +624,8 @@ class ProductionPanel extends Component
         }
 
         // Defect
-        // $undoDefectTypes = DefectType::all();
-        // $undoDefectAreas = DefectArea::all();
+        $undoDefectTypes = DefectType::all();
+        $undoDefectAreas = DefectArea::all();
 
         return view('livewire.production-panel' /*, ['undoDefectTypes' => $undoDefectTypes, 'undoDefectAreas' => $undoDefectAreas]*/);
     }
