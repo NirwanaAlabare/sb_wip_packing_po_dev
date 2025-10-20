@@ -66,7 +66,7 @@
                                 <input type="radio" name="size-input" id="size-input" value="{{ $order->so_det_id }}"  wire:model.defer='sizeInput'>
                                 <div class="btn btn-rft btn-size w-100 h-100 fs-3 py-auto d-flex flex-column justify-content-center align-items-center">
                                     <p class="fs-3 mb-0">{{ $order->size }}</p>
-                                    <p class="fs-6 mb-0">{{ $order->dest }}</p>
+                                    {{-- <p class="fs-6 mb-0">{{ $order->dest }}</p> --}}
                                     <p class="fs-5 mb-0">{{ $output->where('so_det_id', $order->so_det_id)->sum('output') }}</p>
                                 </div>
                             </label>

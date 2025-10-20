@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\SignalBit\OutputGudangStok;
 use Livewire\Component;
 use App\Models\SignalBit\MasterPlan;
 use App\Models\SignalBit\Rft;
@@ -144,7 +145,7 @@ class ProductionPanel extends Component
             ->where('so_det.color', $this->selectedColorName)
             ->where('master_plan.cancel', 'N')
             ->where('so_det.cancel', 'N')
-            ->groupBy('so_det.color', 'so_det.size')
+            ->groupBy('act_costing.id', 'so_det.color', 'so_det.size')
             ->orderBy('so_det_id')
             ->get();
 
@@ -223,6 +224,7 @@ class ProductionPanel extends Component
                     where('so_det_id', $this->undoSize)->
                     where('created_by', Auth::user()->id)->
                     where('status', 'NORMAL')->
+                    whereNull('kode_numbering')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
                     take($this->undoQty);
@@ -230,6 +232,7 @@ class ProductionPanel extends Component
                 $getRfts = $rftSql->get();
 
                 foreach ($getRfts as $getRft) {
+                    // Create Log
                     $addUndoHistory = Undo::create([
                         'master_plan_id' => $getRft->master_plan_id,
                         'so_det_id' => $getRft->so_det_id,
@@ -244,8 +247,14 @@ class ProductionPanel extends Component
                         'updated_at' => $getRft->updated_at,
                         'undo_by' => Auth::user()->id
                     ]);
+
+                    // Delete From Gudang Stok
+                    if ($getRft->id != null) {
+                        $deleteGudangStok = OutputGudangStok::where("packing_po_id", $getRft->id)->delete();
+                    }
                 }
 
+                // Delete RFT
                 $deleteRft = $rftSql->delete();
 
                 if ($deleteRft)  {
@@ -459,7 +468,7 @@ class ProductionPanel extends Component
             ->where('so_det.color', $this->selectedColorName)
             ->where('master_plan.cancel', "N")
             ->where('so_det.cancel', "N")
-            ->groupBy('so_det.id')
+            ->groupBy('act_costing.id', 'so_det.color', 'so_det.size')
             ->orderBy('so_det_id')
             ->get();
 
