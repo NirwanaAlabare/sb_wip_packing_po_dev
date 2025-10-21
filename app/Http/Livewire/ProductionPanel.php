@@ -223,7 +223,7 @@ class ProductionPanel extends Component
                 $rftSql = Rft::where('master_plan_id', $this->orderInfo->id)->
                     where('so_det_id', $this->undoSize)->
                     where('created_by', Auth::user()->id)->
-                    where('status', 'NORMAL')->
+                    where('type', 'rft')->
                     whereNull('kode_numbering')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
@@ -316,7 +316,9 @@ class ProductionPanel extends Component
                 // Undo REJECT
                 $rejectSql = Rft::where('master_plan_id', $this->orderInfo->id)->
                     where('so_det_id', $this->undoSize)->
+                    where('created_by', Auth::user()->id)->
                     where('type', 'reject')->
+                    whereNull('kode_numbering')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
                     take($this->undoQty);
@@ -603,7 +605,8 @@ class ProductionPanel extends Component
                 $this->undoSizes = Rft::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
                     leftJoin('so_det', 'so_det.id', '=', 'output_rfts_packing_po.so_det_id')->
                     where('master_plan_id', $this->orderInfo->id)->
-                    where('status', 'NORMAL')->
+                    where('type', 'rft')->
+                    whereNull('kode_numbering')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
                     groupBy('so_det.id', 'so_det.size')->
@@ -621,10 +624,11 @@ class ProductionPanel extends Component
             //         get();
             //     break;
             case 'reject' :
-                $this->undoSizes = Reject::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
-                    leftJoin('so_det', 'so_det.id', '=', 'output_rejects_packing.so_det_id')->
+                $this->undoSizes = Rft::selectRaw('so_det.id as so_det_id, so_det.size, count(*) as total')->
+                    leftJoin('so_det', 'so_det.id', '=', 'output_rfts_packing_po.so_det_id')->
                     where('master_plan_id', $this->orderInfo->id)->
-                    where('status', 'NORMAL')->
+                    where('type', 'reject')->
+                    whereNull('kode_numbering')->
                     orderBy('updated_at', 'DESC')->
                     orderBy('created_at', 'DESC')->
                     groupBy('so_det.id', 'so_det.size')->
@@ -647,7 +651,7 @@ class ProductionPanel extends Component
         $undoDefectTypes = DefectType::all();
         $undoDefectAreas = DefectArea::all();
 
-        return view('livewire.production-panel' /*, ['undoDefectTypes' => $undoDefectTypes, 'undoDefectAreas' => $undoDefectAreas]*/);
+        return view('livewire.production-panel' , ['undoDefectTypes' => $undoDefectTypes, 'undoDefectAreas' => $undoDefectAreas]);
     }
 
     public function dehydrate()
