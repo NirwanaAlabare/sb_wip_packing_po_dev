@@ -18,6 +18,7 @@ class Undo extends Model
         'master_plan_id',
         'so_det_id',
         'po_id',
+        'output_id',
         'output_rft_id',
         'output_defect_id',
         'output_reject_id',
@@ -31,23 +32,28 @@ class Undo extends Model
         'updated_at',
     ];
 
-    public function rft()
+    public function output()
     {
-        return $this->hasOne(Rft::class, 'id', 'output_rft_id');
+        return $this->hasOne(Rft::class, 'id', 'output_id');
     }
 
-    public function defect()
-    {
-        return $this->hasOne(Defect::class, 'id', 'output_defect_id');
-    }
+    // public function rft()
+    // {
+    //     return $this->hasOne(Rft::class, 'id', 'output_rft_id');
+    // }
 
-    public function reject()
-    {
-        return $this->hasOne(Reject::class, 'id', 'output_reject_id');
-    }
+    // public function defect()
+    // {
+    //     return $this->hasOne(Defect::class, 'id', 'output_defect_id');
+    // }
 
-    public function rework()
-    {
-        return $this->hasOne(Rework::class, 'id', 'output_rework_id');
-    }
+    // public function reject()
+    // {
+    //     return $this->hasOne(Reject::class, 'id', 'output_reject_id');
+    // }
+
+    // public function rework()
+    // {
+    //     return $this->hasOne(Rework::class, 'id', 'output_rework_id');
+    // }
 }

@@ -195,7 +195,7 @@ class ProductionPanel extends Component
         $this->rft = false;
         // $this->defect = false;
         // $this->defectHistory = false;
-        // $this->reject = false;
+        $this->reject = false;
         // $this->rework = false;
         $this->emit('fromInputPanel');
     }
@@ -237,7 +237,8 @@ class ProductionPanel extends Component
                         'master_plan_id' => $getRft->master_plan_id,
                         'so_det_id' => $getRft->so_det_id,
                         'po_id' => $getRft->po_id,
-                        'output_rft_id' => $getRft->id,
+                        'output_id' => $getRft->id,
+                        'output_rft_id' => $getRft->rft_id,
                         'alokasi' => $getRft->alokasi,
                         'keterangan' => 'rft',
                         'created_by' => $getRft->created_by,
@@ -311,36 +312,46 @@ class ProductionPanel extends Component
             //     }
 
             //     break;
-            // case 'reject' :
-            //     // Undo REJECT
-            //     $rejectSql = Reject::where('master_plan_id', $this->orderInfo->id)->
-            //         where('so_det_id', $this->undoSize)->
-            //         orderBy('updated_at', 'DESC')->
-            //         orderBy('created_at', 'DESC')->
-            //         take($this->undoQty);
+            case 'reject' :
+                // Undo REJECT
+                $rejectSql = Rft::where('master_plan_id', $this->orderInfo->id)->
+                    where('so_det_id', $this->undoSize)->
+                    where('type', 'reject')->
+                    orderBy('updated_at', 'DESC')->
+                    orderBy('created_at', 'DESC')->
+                    take($this->undoQty);
 
-            //     $getRejects = $rejectSql->get();
+                $getRejects = $rejectSql->get();
 
-            //     foreach ($getRejects as $reject) {
-            //         $addUndoHistory = Undo::create([
-            //             'master_plan_id' => $reject->master_plan_id,
-            //             'so_det_id' => $reject->so_det_id,
-            //             'output_reject_id' => $reject->id,
-            //             'keterangan' => 'reject',
-            //         ]);
-            //     }
+                foreach ($getRejects as $reject) {
+                    $addUndoHistory = Undo::create([
+                        'master_plan_id' => $reject->master_plan_id,
+                        'so_det_id' => $reject->so_det_id,
+                        'po_id' => $reject->po_id,
+                        'output_id' => $reject->id,
+                        'output_reject_id' => $reject->reject_id,
+                        'alokasi' => $reject->alokasi,
+                        'keterangan' => 'reject',
+                        'created_by' => $reject->created_by,
+                        'created_by_username' => $reject->created_by_username,
+                        'created_by_line' => $reject->created_by_line,
+                        'created_at' => $reject->created_at,
+                        'updated_at' => $reject->updated_at,
+                        'undo_by' => Auth::user()->id
+                    ]);
+                }
 
-            //     $deleteReject = $rejectSql->delete();
+                $deleteReject = $rejectSql->delete();
 
-            //     if ($deleteReject) {
-            //         $this->emit('alert', 'success', 'Output REJECT dengan ukuran '.$size[0]->size.' berhasil di UNDO sebanyak '.$deleteReject.' kali.');
+                if ($deleteReject) {
+                    $this->emit('alert', 'success', 'Output REJECT dengan ukuran '.$size[0]->size.' berhasil di UNDO sebanyak '.$deleteReject.' kali.');
 
-            //         $this->emit('hideModal', 'undo');
-            //     } else {
-            //         $this->emit('alert', 'error', 'Output REJECT dengan ukuran '.$size[0]->size.' gagal di UNDO.');
-            //     }
+                    $this->emit('hideModal', 'undo');
+                } else {
+                    $this->emit('alert', 'error', 'Output REJECT dengan ukuran '.$size[0]->size.' gagal di UNDO.');
+                }
 
-            //     break;
+                break;
             // case 'rework' :
             //     // Undo REWORK
             //     $defectQuery = Defect::selectRaw('output_defects_packing.id as defect_id, output_defects_packing.*')->

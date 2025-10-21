@@ -148,6 +148,7 @@
                         </div>
                     </div>
                 </div>
+                -->
                 <div class="col-md-6" id="reject-panel">
                     <div class="d-flex h-100">
                         <div class="card-custom bg-reject d-flex justify-content-between align-items-center w-75 h-100" {{-- onclick="toReject()" --}} wire:click='toReject'>
@@ -155,7 +156,7 @@
                                 <p class="text-light"><i class="fa-regular fa-circle-xmark fa-2xl"></i></p>
                                 <p class="text-light">REJECT</p>
                             </div>
-                            <p class="text-light fs-1">{{-- $outputReject --}}</p>
+                            <p class="text-light fs-1">{{ $outputReject }}</p>
                         </div>
                         <div class="card-custom-footer bg-light w-25 h-100">
                             <button class="reset single-item btn btn-pale w-100 h-100" wire:click="preSubmitUndo('reject')" >
@@ -164,6 +165,7 @@
                         </div>
                     </div>
                 </div>
+                <!--
                 <div class="col-md-6" id="rework-panel">
                     <div class="d-flex h-100">
                         <div class="card-custom bg-rework d-flex justify-content-between align-items-center w-75 h-100" {{-- onclick="toRework()" --}} wire:click='toRework'>
@@ -204,9 +206,9 @@
         @endif --}}
 
         {{-- Reject --}}
-        {{-- <div class="{{ $reject ? '' : 'd-none' }}">
+        <div class="{{ $reject ? '' : 'd-none' }}">
             @livewire('reject', ["orderWsDetailSizes" => $orderWsDetailSizes])
-        </div> --}}
+        </div>
 
         {{-- Rework --}}
         {{-- <div class="{{ $rework ? '' : 'd-none' }}">
@@ -262,7 +264,7 @@
                             </div>
                         </div>
                     </div>
-                    @if ($undoType == 'defect' || $undoType == 'rework')
+                    @if ($undoType == 'defect' || $undoType == 'rework' || $undoType == 'reject')
                         <div class="mb-3">
                             <label class="form-label">Defect Type <small>(not required)</small></label>
                             <select class="form-select" name="undo-defect-type" id="undo-defect-type" wire:model='undoDefectType'>
@@ -292,20 +294,26 @@
         </div>
     </div>
 
-    {{-- @if ($panels)
+    @if ($panels)
         <div class="w-100">
             <p class="mt-4 text-center opacity-50"><small><i>{{ date('Y') }} &copy; Nirwana Digital Solution</i></small></p>
         </div>
-    @endif --}}
+    @endif
 
     @if (!$panels)
         {{-- Back --}}
-        {{-- <a wire:click="toProductionPanel" class="back bg-success text-light text-center w-auto">
-            <i class="fa-regular fa-reply"></i>
-        </a> --}}
-        <a href="{{ $this->baseUrl }}" class="back bg-success text-light text-center w-auto" id="back-button">
-            <i class="fa-regular fa-reply"></i>
-        </a>
+        @if (Auth::user()->line_type == "multi")
+            <a wire:click="toProductionPanel" class="back bg-sb text-light text-center w-auto" id="back-button">
+                <i class="fa-regular fa-reply"></i>
+            </a>
+        @else
+            {{-- <a wire:click="toOrderList" class="back bg-success text-light text-center w-auto" id="back-button">
+                <i class="fa-regular fa-reply"></i>
+            </a> --}}
+            <a href="{{ $this->baseUrl }}" class="back bg-success text-light text-center w-auto" id="back-button">
+                <i class="fa-regular fa-reply"></i>
+            </a>
+        @endif
     @endif
 </div>
 

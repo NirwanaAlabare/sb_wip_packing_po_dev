@@ -15,6 +15,7 @@ class ProductionController extends Controller
                 master_plan.id as id,
                 master_plan.tgl_plan as tgl_plan,
                 REPLACE(master_plan.sewing_line, '_', ' ') as sewing_line,
+                master_plan.id_ws as id_ws,
                 act_costing.kpno as ws_number,
                 act_costing.styleno as style_name,
                 mastersupplier.supplier as buyer_name,
