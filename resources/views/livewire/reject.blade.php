@@ -64,7 +64,7 @@
                                         <th>Area</th>
                                         <th>Dept.</th>
                                         <th>Total</th>
-                                        <th>Action</th>
+                                        <th class="d-none">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -86,7 +86,7 @@
                                                 <td>{{ $rejectList->defect_area }}</td>
                                                 <td>{{ strtoupper($rejectList->output_type == "packing" ? "finishing" : $rejectList->output_type) }}</td>
                                                 <td><b>{{ $rejectList->total }}</b></td>
-                                                <td>
+                                                <td class="d-none">
                                                     <div wire:loading>
                                                         <div class="loading-small"></div>
                                                     </div>
