@@ -172,7 +172,7 @@ class Rft extends Component
                             'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
                             'alokasi' => $currentPo ? "po" : "gudang stok",
-                            'rft_id' => $finishlineOutputData ? $finishlineOutputData->id : NULL,
+                            'rft_id' => NULL,
                             'type' => 'rft',
                             'department' => 'packing',
                             'created_by' => Auth::user()->id,

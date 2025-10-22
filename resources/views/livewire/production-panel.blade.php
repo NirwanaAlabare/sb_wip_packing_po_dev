@@ -149,7 +149,7 @@
                     </div>
                 </div>
                 -->
-                <div class="col-md-6" id="reject-panel">
+                <div class="col-md-6 d-none" id="reject-panel">
                     <div class="d-flex h-100">
                         <div class="card-custom bg-reject d-flex justify-content-between align-items-center w-75 h-100" {{-- onclick="toReject()" --}} wire:click='toReject'>
                             <div class="d-flex flex-column gap-3">
