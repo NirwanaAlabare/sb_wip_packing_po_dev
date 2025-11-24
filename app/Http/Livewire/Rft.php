@@ -153,6 +153,7 @@ class Rft extends Component
             ->leftJoin('signalbit_erp.masterproduct', 'masterproduct.id', '=', 'act_costing.id_product')
             ->where('so_det.cancel', '!=', 'Y')
             ->where('ppic_master_so.po', $this->selectedPo)
+            ->where('act_costing.id', $currentSoDet->id_cost)
             ->where('so_det.color', $currentSoDet->color)
             ->where('so_det.size', $currentSoDet->size)
             ->groupBy('ppic_master_so.id')
