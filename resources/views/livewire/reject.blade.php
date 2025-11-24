@@ -17,7 +17,7 @@
                                         <p class="fs-6 text-center mb-0">{{ $key }}</p>
                                     </div>
                                     <div class="card-body">
-                                        <p class="fs-6 text-center mb-0">{{ $output->where('size', $key)->count() }}</p>
+                                        <p class="fs-6 text-center mb-0">{{ $rejects->where('so_det_size', $key)->count() }}</p>
                                     </div>
                                 </div>
                             </div>
