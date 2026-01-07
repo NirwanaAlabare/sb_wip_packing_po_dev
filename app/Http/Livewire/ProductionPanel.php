@@ -99,8 +99,8 @@ class ProductionPanel extends Component
         $session->put("orderWsDetails", $orderWsDetails);
 
         // Default value
-        $this->selectedColor = $this->orderWsDetails[0]->id;
-        $this->selectedColorName = $this->orderWsDetails[0]->color;
+        $this->selectedColor = $this->orderWsDetails && isset($this->orderWsDetails[0]) ? $this->orderWsDetails[0]->id : null;
+        $this->selectedColorName = $this->orderWsDetails && isset($this->orderWsDetails[0]) ? $this->orderWsDetails[0]->color : null;
         $this->selectedSize = 'all';
         $this->selectedPo = '';
         $this->selectedPoId = '';
