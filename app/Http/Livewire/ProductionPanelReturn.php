@@ -15,6 +15,8 @@ class ProductionPanelReturn extends Component
 
     protected $paginationTheme = 'bootstrap'; 
 
+    public $output_rfts_packing_po_id;
+    public $master_plan_id;
     public $selectedPo;
     public $selectedPoId;
     public $selectedPoWs;
@@ -64,6 +66,8 @@ class ProductionPanelReturn extends Component
 
     public function mount()
     {
+        $this->output_rfts_packing_po_id = '';
+        $this->master_plan_id = '';
         $this->selectedPo = '';
         $this->selectedPoId = '';
         $this->selectedPoWs = '';
@@ -93,6 +97,8 @@ class ProductionPanelReturn extends Component
         $this->validate();
 
         ReturnPacking::create([
+            'output_rfts_packing_po_id' => $this->output_rfts_packing_po_id,
+            'master_plan_id' => $this->master_plan_id,
             'ppic_master_id' => $this->selectedPoId,
             'act_costing_id' => $this->actCostingId,
             'so_det_id' => $this->soDetId,
@@ -111,6 +117,8 @@ class ProductionPanelReturn extends Component
         ]);
 
         $this->reset([
+            'output_rfts_packing_po_id',
+            'master_plan_id',
             'selectedPo',
             'selectedPoId',
             'selectedPoWs',

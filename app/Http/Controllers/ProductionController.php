@@ -333,7 +333,9 @@ class ProductionController extends Controller
         $data = DB::table('output_rfts_packing_po')
             ->selectRaw("
                 output_rfts_packing_po.created_by_line AS line,
-                COUNT(output_rfts_packing_po.id) as tot_qty_in
+                COUNT(output_rfts_packing_po.id) as tot_qty_in,
+                output_rfts_packing_po.id AS output_rfts_packing_po_id,
+                output_rfts_packing_po.master_plan_id
             ")
             ->leftJoin("laravel_nds.ppic_master_so", "ppic_master_so.id", "=", "output_rfts_packing_po.po_id")
             ->leftJoin('so_det', 'so_det.id', '=', 'ppic_master_so.id_so_det')

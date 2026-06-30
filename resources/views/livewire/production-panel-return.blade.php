@@ -536,7 +536,14 @@
 
                         if (response) {
                             response.forEach(item => {
-                                finishingLineSelect.append(`<option value="${item.line}">${item.line}</option>`);
+                                finishingLineSelect.append(`
+                                    <option
+                                        value="${item.line}"
+                                        data-output-id="${item.output_rfts_packing_po_id}"
+                                        data-master-plan-id="${item.master_plan_id}">
+                                        ${item.line}
+                                    </option>
+                                `);
                             });
                         }
 
@@ -673,10 +680,11 @@
         });
 
         $('#product-po-finishing-line').on('change', function (e) {
-            let selectedPoFinishingLine = $(this).val();
+            let selected = $(this).find(':selected');
 
-            @this.selectedPoFinishingLine = selectedPoFinishingLine;
-
+            @this.selectedPoFinishingLine = selected.val();
+            @this.output_rfts_packing_po_id = selected.data('output-id');
+            @this.master_plan_id = selected.data('master-plan-id');
         });
 
         function resetPo() {
