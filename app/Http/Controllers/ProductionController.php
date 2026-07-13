@@ -264,14 +264,16 @@ class ProductionController extends Controller
     // Return
     public function getPoReturn(Request $request)
     {
-        $orderWsDetailsPo = DB::connection("mysql_nds")->table("ppic_master_so")->selectRaw("
-                ppic_master_so.id,
+        $orderWsDetailsPo = DB::connection('mysql_nds')
+            ->table('ppic_master_so')
+            ->join('signalbit_erp.output_rfts_packing_po as orpp', 'orpp.po_id', '=', 'ppic_master_so.id')
+            ->selectRaw('
+                MIN(ppic_master_so.id) as id,
                 ppic_master_so.po
-            ")
-            ->where('ppic_master_so.po', 'like', "%".($request->search ?? "")."%")
+            ')
+            ->where('ppic_master_so.po', 'like', "%{$request->search}%")
             ->groupBy('ppic_master_so.po')
             ->get();
-
         // if (Auth::user()->line_type == "multi") {
         //     $orderWsDetailsPo->push((object)[
         //         'po' => 'GUDANG_STOK',
@@ -341,7 +343,17 @@ class ProductionController extends Controller
         $data = DB::table('output_rfts_packing_po')
             ->selectRaw("
                 output_rfts_packing_po.created_by_line AS line,
-                COUNT(output_rfts_packing_po.id) as tot_qty_in,
+                (
+                    COUNT(output_rfts_packing_po.id) -
+                    COALESCE(
+                        (
+                            SELECT COUNT(*)
+                            FROM output_rfts_packing_po_return
+                            WHERE output_rfts_packing_po_return.output_rfts_packing_po_id = output_rfts_packing_po.id
+                        ),
+                        0
+                    )
+                ) AS tot_qty_in,
                 output_rfts_packing_po.id AS output_rfts_packing_po_id,
                 output_rfts_packing_po.master_plan_id
             ")
@@ -363,7 +375,15 @@ class ProductionController extends Controller
     public function getQtyPackingLineReturn(Request $request){
         $data = DB::table('output_rfts_packing_po')
             ->selectRaw("
-                COUNT(*) as qty_packing_line
+                COUNT(*) -
+                COALESCE(
+                    (
+                        SELECT COUNT(*)
+                        FROM output_rfts_packing_po_return
+                        WHERE output_rfts_packing_po_return.output_rfts_packing_po_id = output_rfts_packing_po.id
+                    ),
+                    0
+                ) AS qty_packing_line
             ")
             ->leftJoin("laravel_nds.ppic_master_so", "ppic_master_so.id", "=", "output_rfts_packing_po.po_id")
             ->leftJoin('so_det', 'so_det.id', '=', 'ppic_master_so.id_so_det')
