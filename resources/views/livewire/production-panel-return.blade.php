@@ -467,7 +467,7 @@
 
                         if (response) {
                             response.forEach(item => {
-                                sizeSelect.append(`<option value="${item.size}" data-qtyorder="${item.qty_order}">${item.size}</option>`);
+                                sizeSelect.append(`<option value="${item.size}" data-qtyorder="${item.qty_order}" data-sodetid="${item.id}">${item.size}</option>`);
                             });
                         }
 
@@ -639,10 +639,8 @@
             let selectedPo = $('#product-po').val();
             let selectedPoWs = $('#product-po-ws').val();
             let selectedPoColor = $(this).val();
-            let soDetId = $(this).find(':selected').data('id');
 
             @this.selectedPoColor = selectedPoColor;
-            @this.soDetId = soDetId;
 
             resetSize();
             resetLine();
@@ -656,6 +654,9 @@
             let selectedPoColor = $('#product-po-color').val();
             let selectedPoSize = $(this).val();
             let qtyOrder = $(this).find(':selected').data('qtyorder');
+            let soDetId = $(this).find(':selected').data('sodetid');
+            
+            @this.soDetId = soDetId;
 
             $('#qty_order').val(qtyOrder ?? 0);
 

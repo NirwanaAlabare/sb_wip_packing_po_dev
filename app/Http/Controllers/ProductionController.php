@@ -323,6 +323,7 @@ class ProductionController extends Controller
     public function getSizeReturn(Request $request){
         $data = DB::table('so_det')
             ->selectRaw("
+                so_det.id,
                 so_det.size,
                 ppic_master_so.qty_po AS qty_order
             ")
