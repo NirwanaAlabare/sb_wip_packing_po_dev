@@ -114,7 +114,10 @@
                                         <p class="text-center fs-3 mt-auto mb-auto">{{ $outputFiltered }}</p>
                                     </div>
                                 </div>
-                                <button type="button" class="reset multi-item lower btn btn-pale h-50" wire:click="preSubmitUndo('rft')" >
+                                <!-- <button type="button" class="reset multi-item lower btn btn-pale h-50" wire:click="preSubmitUndo('rft')" >
+                                    <i class="fa-regular fa-rotate-left fa-2xl"></i>
+                                </button> -->
+                                <button type="button" class="reset multi-item lower btn btn-pale h-50" disabled>
                                     <i class="fa-regular fa-rotate-left fa-2xl"></i>
                                 </button>
                             </div>
@@ -159,7 +162,10 @@
                             <p class="text-light fs-1">{{ $outputReject }}</p>
                         </div>
                         <div class="card-custom-footer bg-light w-25 h-100">
-                            <button class="reset single-item btn btn-pale w-100 h-100" wire:click="preSubmitUndo('reject')" >
+                            <!-- <button class="reset single-item btn btn-pale w-100 h-100" wire:click="preSubmitUndo('reject')" >
+                                <i class="fa-regular fa-rotate-left fa-2xl"></i>
+                            </button> -->
+                            <button class="reset single-item btn btn-pale w-100 h-100" disabled >
                                 <i class="fa-regular fa-rotate-left fa-2xl"></i>
                             </button>
                         </div>

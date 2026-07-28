@@ -75,9 +75,9 @@
                     </tbody>
                 </table>
                 {{ $latestUndo->links( )}}
-                <button class="btn btn-success w-auto" wire:click='restoreUndo'>
+                <!-- <button class="btn btn-success w-auto" wire:click='restoreUndo'>
                     <i class="fa fa-reply"></i> Restore
-                </button>
+                </button> -->
             </div>
         </div>
     </div>

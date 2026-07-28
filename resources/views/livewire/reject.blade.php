@@ -151,7 +151,7 @@
                         </tr>
                         @if ($rejectIn->count() < 1)
                             <tr>
-                                <td colspan='10'>Reject tidak ditemukan</td>
+                                <td colspan='11'>Reject tidak ditemukan</td>
                             </tr>
                         @else
                             @foreach ($rejectIn as $rejIn)
@@ -232,7 +232,7 @@
                         </tr>
                         @if ($rejects->count() < 1)
                             <tr>
-                                <td colspan='10'>Reject tidak ditemukan</td>
+                                <td colspan='12'>Reject tidak ditemukan</td>
                             </tr>
                         @else
                             @foreach ($rejects as $reject)
