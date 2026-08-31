@@ -150,7 +150,7 @@ class UndoContent extends Component
             if ($this->masterPlan) {
                 $latestUndoSql->where('master_plan.id', $this->masterPlan);
             }
-        $latestUndo = $latestUndoSql->whereRaw("DATE(output_undo_packing_po.created_at) BETWEEN '".$this->dateFrom."' AND '".$this->dateTo."'")->
+        $latestUndo = $latestUndoSql->whereRaw("output_undo_packing_po.created_at BETWEEN '".$this->dateFrom." 00:00:00' AND '".$this->dateTo." 23:59:59'")->
             whereRaw("master_plan.tgl_plan BETWEEN '".$this->dateFrom."' AND '".$this->dateTo."'")->
             groupBy("output_undo_packing_po.updated_at", "output_undo_packing_po.keterangan", "so_det.size")->
             orderBy("output_undo_packing_po.updated_at", "desc")->

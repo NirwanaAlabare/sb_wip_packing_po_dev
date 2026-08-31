@@ -43,9 +43,9 @@ class ProfileContent extends Component
             if ($this->masterPlan) {
                 $totalRftSql->where('master_plan.id', $this->masterPlan);
             }
-        $totalRft = $totalRftSql->whereRaw("DATE(output_rfts_packing_po.created_at) >= '".$this->dateFrom."'")->
+        $totalRft = $totalRftSql->whereRaw("output_rfts_packing_po.created_at >= '".$this->dateFrom." 00:00:00'")->
             where("status", "NORMAL")->
-            whereRaw("DATE(output_rfts_packing_po.created_at) <= '".$this->dateTo."'")->
+            whereRaw("output_rfts_packing_po.created_at <= '".$this->dateTo." 23:59:59'")->
             count();
 
         // $totalDefectSql = Defect::select('output_defects_packing.*')->
