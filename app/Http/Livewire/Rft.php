@@ -104,6 +104,10 @@ class Rft extends Component
 
     public function submitInput()
     {
+        if ($this->orderInfo && $this->orderInfo->sewing_line != (Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username)) {
+            return $this->emit('differentLine', (Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username), $this->orderInfo->sewing_line);
+        }
+
         $validatedData = $this->validate();
 
         $currentSoDet = DB::table("so_det")->selectRaw("so_det.id as so_det_id, act_costing.id as id_cost, act_costing.kpno, so_det.color, so_det.size, so_det.dest")->leftJoin("so", "so.id", "=", "so_det.id_so")->leftJoin("act_costing", "act_costing.id", "=", "so.id_cost")->where("act_costing.id", $this->orderInfo->id_ws)->where("so_det.color", $this->orderInfo->color)->where("so_det.id", $this->sizeInput)->first();
