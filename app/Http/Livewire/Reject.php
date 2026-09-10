@@ -740,7 +740,7 @@ class Reject extends Component
                 ->groupBy('ppic_master_so.id')
                 ->first();
 
-            if ($this->selectedPo == "GUDANG_STOK" || $currentPo) {
+            if ($this->selectedPo == "TEMPORARY_PACKING" || $currentPo) {
                 // add to reject
                 $createReject = Rft::create([
                     'master_plan_id' => $this->orderInfo->id,
@@ -759,7 +759,7 @@ class Reject extends Component
                 ]);
 
                 if ($createReject) {
-                    if ($this->selectedPo == "GUDANG_STOK") {
+                    if ($this->selectedPo == "TEMPORARY_PACKING") {
                         OutputGudangStok::create([
                             'so_det_id' => $reject->so_det_id,
                             'packing_po_id' => $createReject->id,

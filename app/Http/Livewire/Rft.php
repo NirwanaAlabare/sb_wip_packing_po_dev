@@ -165,9 +165,9 @@ class Rft extends Component
 
         $insertData = [];
         if ($this->outputInput > 0) {
-            if ($this->selectedPo == "GUDANG_STOK" || $currentPo) {
+            if ($this->selectedPo == "TEMPORARY_PACKING" || $currentPo) {
 
-                if ($this->selectedPo == "GUDANG_STOK" || (($currentPo->qty_output + $this->outputInput) <= $currentPo->qty_po)) {
+                if ($this->selectedPo == "TEMPORARY_PACKING" || (($currentPo->qty_output + $this->outputInput) <= $currentPo->qty_po)) {
                     $batch = Str::uuid();
                     for ($i = 0; $i < $this->outputInput; $i++)
                     {
@@ -193,7 +193,7 @@ class Rft extends Component
 
                     if ($insertRft) {
                         // Gudang Stok
-                        if ($this->selectedPo == "GUDANG_STOK") {
+                        if ($this->selectedPo == "TEMPORARY_PACKING") {
                             $currentRft = RftModel::where("batch", $batch)->get();
 
                             $insertDataGudangStok = [];

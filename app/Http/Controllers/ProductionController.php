@@ -92,9 +92,11 @@ class ProductionController extends Controller
             ->get();
 
         if (Auth::user()->line_type == "multi") {
-            $orderWsDetailsPo->push((object)[
-                'po' => 'GUDANG_STOK',
-            ]);
+            if (!$request->is_reject) {
+                $orderWsDetailsPo->push((object)[
+                    'po' => 'TEMPORARY_PACKING',
+                ]);
+            }
         }
 
         return json_encode($orderWsDetailsPo);
@@ -102,7 +104,7 @@ class ProductionController extends Controller
 
     public function getPoSize(Request $request)
     {
-        if ($request->po == "GUDANG_STOK") {
+        if ($request->po == "TEMPORARY_PACKING") {
             $orderWsDetailsPoSize = DB::table("so_det")->selectRaw("
                     so_det.id as id,
                     '-' as po,
@@ -152,7 +154,7 @@ class ProductionController extends Controller
         $from = date("Y-m-d")." 00:00:00";
         $to = date("Y-m-d")." 23:59:59";
 
-        if ($request->po == "GUDANG_STOK") {
+        if ($request->po == "TEMPORARY_PACKING") {
             $orderWsDetailsPoSizeQty = DB::table("so_det")->selectRaw("
                     '-' as po,
                     so_det.id as id_so_det,
@@ -169,8 +171,8 @@ class ProductionController extends Controller
                     left join output_gudang_stok on output_gudang_stok.so_det_id = so_det.id
                     where
                         so_det.id = '".$request->po_id."' and
-                        output_rfts_packing_po.created_by = '".Auth::user()->id."' and
-                        output_rfts_packing_po.created_at between '".$from."' and '".$to."'
+                        output_gudang_stok.created_by = '".Auth::user()->id."' and
+                        output_gudang_stok.created_at between '".$from."' and '".$to."'
                     group by
                         so_det.id
                 ) as output"), "output.so_det_id", "=", "so_det.id")
@@ -305,7 +307,7 @@ class ProductionController extends Controller
             ->get();
         // if (Auth::user()->line_type == "multi") {
         //     $orderWsDetailsPo->push((object)[
-        //         'po' => 'GUDANG_STOK',
+        //         'po' => 'TEMPORARY_PACKING',
         //     ]);
         // }
 
