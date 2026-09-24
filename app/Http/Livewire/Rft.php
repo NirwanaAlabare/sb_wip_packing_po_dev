@@ -176,7 +176,7 @@ class Rft extends Component
                             'so_det_id' => $currentPo ? $currentPo->so_det_id : $currentSoDet->so_det_id,
                             'po_id' => $currentPo ? $currentPo->id : NULL,
                             'status' => 'NORMAL',
-                            'alokasi' => $currentPo ? "po" : "gudang stok",
+                            'alokasi' => $currentPo ? "po" : "temporary packing",
                             'rft_id' => NULL,
                             'type' => 'rft',
                             'department' => 'packing',
@@ -192,7 +192,7 @@ class Rft extends Component
                     $insertRft = RftModel::insert($insertData);
 
                     if ($insertRft) {
-                        // Gudang Stok
+                        // Temporary Packing
                         if ($this->selectedPo == "TEMPORARY_PACKING") {
                             $currentRft = RftModel::where("batch", $batch)->get();
 
