@@ -14,12 +14,14 @@ use App\Models\SignalBit\Defect;
 use App\Models\SignalBit\Rft;
 use App\Models\SignalBit\Reject as RejectModel;
 use App\Models\SignalBit\MasterPlan;
+use App\Traits\ChecksMasterPlanCancel;
 use Carbon\Carbon;
 use DB;
 
 class Reject extends Component
 {
     use WithPagination;
+    use ChecksMasterPlanCancel;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -270,6 +272,10 @@ class Reject extends Component
     }
 
     public function submitAllReject() {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $availableReject = 0;
 
         // Get All Rejects
@@ -416,6 +422,10 @@ class Reject extends Component
     }
 
     public function submitMassReject() {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $availableReject = 0;
 
         // Get Selected Reject
@@ -628,6 +638,10 @@ class Reject extends Component
     }
 
     public function submitReject($rejectId, $department) {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $thisDefectReject = Rft::where('reject_id', $rejectId)->where("department", $department)->count();
 
         if ($thisDefectReject < 1) {

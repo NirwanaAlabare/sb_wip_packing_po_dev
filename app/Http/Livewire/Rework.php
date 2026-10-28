@@ -12,11 +12,13 @@ use App\Models\SignalBit\Rft;
 use App\Models\SignalBit\Defect;
 use App\Models\SignalBit\Rework as ReworkModel;
 use App\Models\Nds\OutputPacking;
+use App\Traits\ChecksMasterPlanCancel;
 use DB;
 
 class Rework extends Component
 {
     use WithPagination;
+    use ChecksMasterPlanCancel;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -146,6 +148,10 @@ class Rework extends Component
     }
 
     public function submitAllRework() {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $allDefect = Defect::selectRaw('output_defects_packing.id id, output_defects_packing.master_plan_id master_plan_id, output_defects_packing.so_det_id so_det_id')->
             leftJoin('so_det', 'so_det.id', '=', 'output_defects_packing.so_det_id')->
             where('output_defects_packing.defect_status', 'defect')->
@@ -219,6 +225,10 @@ class Rework extends Component
     }
 
     public function submitMassRework() {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $selectedDefect = Defect::selectRaw('output_defects_packing.*, so_det.size as size')->
             leftJoin('so_det', 'so_det.id', '=', 'output_defects_packing.so_det_id')->
             where('output_defects_packing.defect_status', 'defect')->
@@ -291,6 +301,10 @@ class Rework extends Component
     }
 
     public function submitRework($defectId) {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         $thisDefectRework = ReworkModel::where('defect_id', $defectId)->count();
 
         if ($thisDefectRework < 1) {

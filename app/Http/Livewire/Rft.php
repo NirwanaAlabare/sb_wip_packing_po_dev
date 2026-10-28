@@ -13,11 +13,14 @@ use App\Models\SignalBit\Rework;
 use App\Models\SignalBit\Reject;
 use App\Models\SignalBit\EndlineOutput;
 use App\Models\Nds\OutputPacking;
+use App\Traits\ChecksMasterPlanCancel;
 use Carbon\Carbon;
 use DB;
 
 class Rft extends Component
 {
+    use ChecksMasterPlanCancel;
+
     public $orderInfo;
     public $orderWsDetailSizes;
     public $output;
@@ -104,6 +107,10 @@ class Rft extends Component
 
     public function submitInput()
     {
+        if ($this->masterPlanCancelled()) {
+            return;
+        }
+
         if ($this->orderInfo && $this->orderInfo->sewing_line != (Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username)) {
             return $this->emit('differentLine', (Auth::user()->line_type == "multi" ? $this->orderInfo->sewing_line : Auth::user()->line->username), $this->orderInfo->sewing_line);
         }
