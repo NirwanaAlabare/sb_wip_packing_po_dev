@@ -11,17 +11,16 @@ use DB;
 
 class OrderList extends Component
 {
-    public $orders;
     public $search = '';
     public $date = '';
     public $baseUrl = '';
 
-    public $orderFilters = '';
     public $filterLine = '';
     public $filterBuyer = '';
     public $filterWs = '';
     public $filterProductType = '';
     public $filterStyle = '';
+    public $filterColor = '';
     public $filterDate = '';
 
     public $listeners = ['setDate' => 'setDate'];
@@ -46,6 +45,7 @@ class OrderList extends Component
         $this->filterWs = '';
         $this->filterProductType = '';
         $this->filterStyle = '';
+        $this->filterColor = '';
 
         $this->emit('clearFilterInput');
     }
@@ -55,19 +55,9 @@ class OrderList extends Component
         $this->emit('showFilterModal');
     }
 
-    public function submitFilter() {
-        $this->orders = $this->orders->filter(function ($item) {
-            return $item['sewing_line'] == $this->filterLine && $item['ws_number'] == $this->filterWs && $item['buyer_name'] == $this->filterBuyer && $item['product_type'] == $this->filterProductType && $item['style_name'] == $this->filterStyle;
-        })->values();
-    }
-
     public function setDate($date)
     {
         $this->date = $date;
-
-        $this->orders = $this->orders->filter(function ($item) {
-            return $item['plan_date'] == $this->date;
-        })->values();
     }
 
     public function render()
@@ -75,7 +65,7 @@ class OrderList extends Component
         $lineFilter = "";
         if (Auth::user()) {
             if (Auth::user()->line_type == 'multi') {
-                $userMultilines = Auth::user()->multiline()->get();
+                $userMultilines = Auth::user()->multiline()->with('line')->get();
                 $i = 0;
                 foreach ($userMultilines as $userLine) {
                     $lineUsername = $userLine->line ? $userLine->line->username : '';
@@ -132,6 +122,9 @@ class OrderList extends Component
                     REPLACE(master_plan.sewing_line, '_', ' ') LIKE '%".$this->search."%'
                 )
             ")->
+            when($this->filterColor, function ($query) {
+                $query->where('master_plan.color', $this->filterColor);
+            })->
             groupBy("master_plan.sewing_line", "master_plan.id_ws", "master_plan.color")->
             orderBy("tgl_plan", "desc")->
             orderBy("sewing_line", "asc")->
@@ -177,6 +170,9 @@ class OrderList extends Component
                     REPLACE(master_plan.sewing_line, '_', ' ') LIKE '%".$this->search."%'
                 )
             ")->
+            when($this->filterColor, function ($query) {
+                $query->where('master_plan.color', $this->filterColor);
+            })->
             groupBy("master_plan.sewing_line", "master_plan.id_ws", "master_plan.color", "master_plan.tgl_plan")->
             orderBy("tgl_plan", "desc")->
             orderBy("sewing_line", "asc")->
@@ -188,7 +184,7 @@ class OrderList extends Component
             $additionalQuery .= " OR master_plan.id IN ('".$masterPlanWithOutputIds."') ";
         }
 
-        $this->orderFilters = DB::table('master_plan')
+        $orderFilters = DB::table('master_plan')
             ->selectRaw("
                 master_plan.id_ws as id_ws,
                 master_plan.tgl_plan as plan_date,
@@ -196,7 +192,8 @@ class OrderList extends Component
                 act_costing.kpno as ws_number,
                 mastersupplier.supplier as buyer_name,
                 act_costing.styleno as style_name,
-                CONCAT(masterproduct.product_group, ' - ', masterproduct.product_item) as product_type
+                CONCAT(masterproduct.product_group, ' - ', masterproduct.product_item) as product_type,
+                master_plan.color as color
             ")
             ->leftJoin('act_costing', 'act_costing.id', '=', 'master_plan.id_ws')
             ->leftJoin('so', 'so.id_cost', '=', 'act_costing.id')
@@ -217,6 +214,9 @@ class OrderList extends Component
                     ".$additionalQuery."
                 )
             ")
+            ->when($this->filterColor, function ($query) {
+                $query->where('master_plan.color', $this->filterColor);
+            })
             ->orderBy('master_plan.tgl_plan', 'desc')
             ->orderBy('master_plan.sewing_line', 'asc')
             ->orderBy('mastersupplier.supplier', 'asc')
@@ -225,7 +225,7 @@ class OrderList extends Component
             ->orderBy('act_costing.styleno', 'asc')
             ->get();
 
-        $this->orders = DB::table('master_plan')
+        $orders = DB::table('master_plan')
             ->selectRaw("
                 MIN(master_plan.id) as id,
                 master_plan.id_ws as id_ws,
@@ -236,7 +236,8 @@ class OrderList extends Component
                 act_costing.styleno as style_name,
                 COALESCE(output.progress, 0) as progress,
                 COALESCE(output_finishline.progress, 0) as target,
-                CONCAT(masterproduct.product_group, ' - ', masterproduct.product_item) as product_type
+                CONCAT(masterproduct.product_group, ' - ', masterproduct.product_item) as product_type,
+                GROUP_CONCAT(DISTINCT master_plan.color SEPARATOR ' | ') colors
             ")
             ->leftJoin('act_costing', 'act_costing.id', '=', 'master_plan.id_ws')
             ->leftJoin('so', 'so.id_cost', '=', 'act_costing.id')
@@ -318,6 +319,9 @@ class OrderList extends Component
                     ".$additionalQuery."
                 )
             ")
+            ->when($this->filterColor, function ($query) {
+                $query->where('master_plan.color', $this->filterColor);
+            })
             ->whereRaw("
                 (
                     act_costing.kpno LIKE '%".$this->search."%'
@@ -349,6 +353,6 @@ class OrderList extends Component
             ->orderBy('master_plan.sewing_line', 'asc')
             ->get();
 
-        return view('livewire.order-list');
+        return view('livewire.order-list', compact('orders', 'orderFilters'));
     }
 }
