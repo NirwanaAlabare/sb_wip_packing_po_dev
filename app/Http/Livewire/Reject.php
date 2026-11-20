@@ -94,10 +94,10 @@ class Reject extends Component
         'updatePo' => 'updatePo',
     ];
 
-    public function mount(SessionManager $session, $orderWsDetailSizes)
+    public function mount($orderInfo, $orderWsDetailSizes)
     {
+        $this->orderInfo = $orderInfo;
         $this->orderWsDetailSizes = $orderWsDetailSizes;
-        $session->put('orderWsDetailSizes', $orderWsDetailSizes);
         $this->outputInput = 1;
         $this->sizeInput = null;
         $this->sizeInputText = null;
@@ -113,14 +113,17 @@ class Reject extends Component
         $this->emit('loadRejectPageJs');
     }
 
-    public function updateWsDetailSizes()
+    public function updateWsDetailSizes($orderInfoId = null, $orderWsDetailSizes = null)
     {
         $this->outputInput = 1;
         $this->sizeInput = null;
         $this->sizeInputText = '';
 
-        $this->orderInfo = session()->get('orderInfo', $this->orderInfo);
-        $this->orderWsDetailSizes = session()->get('orderWsDetailSizes', $this->orderWsDetailSizes);
+        // Ganti order hanya kalau dikirim dari panel di tab ini (ganti color)
+        if ($orderInfoId) {
+            $this->orderInfo = MasterPlan::find($orderInfoId);
+            $this->orderWsDetailSizes = collect($orderWsDetailSizes);
+        }
     }
 
     public function updatePo($po)
@@ -824,8 +827,6 @@ class Reject extends Component
     {
         $this->emit('loadRejectPageJs');
 
-        $this->orderInfo = $session->get('orderInfo', $this->orderInfo);
-        $this->orderWsDetailSizes = $session->get('orderWsDetailSizes', $this->orderWsDetailSizes);
 
         // Get total output
         $this->output = collect(DB::select("select output_rfts_packing_po.*, so_det.size, COUNT(output_rfts_packing_po.id) output from `output_rfts_packing_po` left join `so_det` on `so_det`.`id` = `output_rfts_packing_po`.`so_det_id` where `master_plan_id` = '".$this->orderInfo->id."' and `type` = 'reject' group by so_det.id"));
